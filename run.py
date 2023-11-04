@@ -26,6 +26,12 @@ def loadTUM(path):
     tstamp = [float(color_path.split("/")[-1].replace("frame", "").replace(".jpg", "").replace(".png", "")) for color_path in color_paths]
     return color_paths, tstamp
 
+def loadKITTI(path):
+    color_paths = sorted(glob.glob(os.path.join(path, "image_2/*.png")))
+    #print(path, color_paths)
+    tstamp = [float(color_path.split("/")[-1].replace("frame", "").replace(".jpg", "").replace(".png", "")) for color_path in color_paths]
+    return color_paths, tstamp
+
 def associate_frames(tstamp_image, tstamp_pose, max_dt=0.08):
     """ pair images, depths, and poses """
     associations = []
@@ -41,6 +47,7 @@ if __name__ == "__main__":
     parser.add_argument("result_path", type=str, default = None)
     parser.add_argument("gt_path", type=str, default = None)
     parser.add_argument("--correct_scale", action="store_true")
+    parser.add_argument("--show_plot", action="store_true")
     args = parser.parse_args()
     sh_degree = 3
     gaussians = GaussianModel(sh_degree)
@@ -76,8 +83,10 @@ if __name__ == "__main__":
             """
 
     #load gt
-    if "Replica" in args.gt_path:
+    if "replica" in args.gt_path.lower():
         gt_color_paths, gt_tstamp = loadReplica(args.gt_path)
+    elif "kitti" in args.gt_path.lower():
+        gt_color_paths, gt_tstamp = loadKITTI(args.gt_path)   
     else:
         gt_color_paths, gt_tstamp = loadTUM(args.gt_path)
     
@@ -98,6 +107,7 @@ if __name__ == "__main__":
         K[1, 2] = camera_model["cy"]  
         crop_edge = camera_model["crop_edge"]
         distortion = np.array(camera_model['distortion']) if 'distortion' in camera_model else None
+        re_u, re_v = cv2.initUndistortRectifyMap(K, distortion, None, K, (camera_model["W"], camera_model["H"]), m1type=cv2.CV_32FC1)
 
     if not os.path.exists(os.path.join(args.result_path, "eval.txt")):
         os.makedirs(os.path.join(args.result_path, "image"), exist_ok=True)
@@ -106,22 +116,21 @@ if __name__ == "__main__":
         for index  in trange(len(associations), desc="rendering {}".format(args.result_path.split("/")[-1])):
             (result_indx, gt_indx) = associations[index]
             w2c = np.linalg.inv(poses[result_indx])
-            #R = np.transpose(w2c[:3,:3])  # R is stored transposed due to 'glm' in CUDA code
-            #T = w2c[:3, 3]
-            #world_view_transform = getWorld2View2(R, T)
-            #print(world_view_transform, world_view_transform2);exit()
             cam = MiniCam(width, height, fovx, fovy, w2c)
+            t0 = time.time()
             render_image = render(cam, gaussians, background)["render"]
+            t1 = time.time() - t0
             render_image = render_image.permute(1, 2, 0)
-            
             gt_image = Image.open(gt_color_paths[gt_indx])
             if distortion is not None:
                 #print(K, distortion)
                 gt_image_mask = np.ones_like(gt_image)
-                gt_image = cv2.undistort(np.array(gt_image), K, distortion)
+                #gt_image = cv2.undistort(np.array(gt_image), K, distortion)
+                gt_image = cv2.remap(np.array(gt_image), re_u, re_v, interpolation=cv2.INTER_LINEAR, borderValue=[0,0,0])
                 #os.makedirs(os.path.join(args.result_path, "image_gt"), exist_ok=True)
                 #cv2.imwrite(os.path.join(args.result_path, "image_gt", gt_color_paths[gt_indx].split("/")[-1]), gt_image[:,:,[2,1,0]])
-                gt_image_mask = cv2.undistort(gt_image_mask, K, distortion)
+                #gt_image_mask = cv2.undistort(gt_image_mask, K, distortion)
+                gt_image_mask = cv2.remap(gt_image_mask, re_u, re_v, interpolation=cv2.INTER_LINEAR, borderValue=[0,0,0])
                 gt_image_mask = torch.from_numpy(np.array(gt_image_mask)).to("cuda")
                 render_image = gt_image_mask * render_image
                 
@@ -141,12 +150,12 @@ if __name__ == "__main__":
             psnr_list.append(val_psnr.item())
             ssim_list.append(val_ssim)
             lpips_list.append(val_lpips.item())
-            #time_list.append(t1)
+            time_list.append(t1)
 
         psnr_list = np.array(psnr_list)
         ssim_list = np.array(ssim_list)
         lpips_list = np.array(lpips_list)
-        #time_list = np.array(time_list)
+        time_list = np.array(time_list)
         np.savetxt(os.path.join(args.result_path, "psnr.txt"), psnr_list)
         np.savetxt(os.path.join(args.result_path, "ssim.txt"), ssim_list)
         np.savetxt(os.path.join(args.result_path, "lpips.txt"), lpips_list)
@@ -161,13 +170,18 @@ if __name__ == "__main__":
     from evo.core import sync
     import evo.main_ape as main_ape
     from evo.core.metrics import PoseRelation
+    # load estimated poses
     traj_est = file_interface.read_tum_trajectory_file(pose_path)
-
-    gt_file = os.path.join(args.gt_path, 'pose_TUM.txt')
-    if not os.path.isfile(gt_file):
-        gt_file = os.path.join(args.gt_path, 'groundtruth.txt')
-        
-    traj_ref = file_interface.read_tum_trajectory_file(gt_file)
+    # load gt pose
+    if "kitti" in args.gt_path.lower():
+        scene = args.gt_path.split("/")[-1]
+        gt_file = args.gt_path.replace(scene, 'poses/{}.txt'.format(scene))
+        traj_ref = file_interface.read_kitti_trajectory_file(gt_file)
+    else:
+        gt_file = os.path.join(args.gt_path, 'pose_TUM.txt')
+        if not os.path.isfile(gt_file):
+            gt_file = os.path.join(args.gt_path, 'groundtruth.txt')   
+        traj_ref = file_interface.read_tum_trajectory_file(gt_file)
 
     traj_ref, traj_est = sync.associate_trajectories(traj_ref, traj_est, max_diff=0.1)
     result = main_ape.ape(traj_ref, traj_est, est_name='traj', 
@@ -181,3 +195,18 @@ if __name__ == "__main__":
         fp.write(result_rotation_part.pretty_str())
     print(result)
 
+    if args.show_plot:
+        from evo.tools import plot
+        from evo.tools.plot import PlotMode
+        import matplotlib.pyplot as plt
+        import copy
+        traj_est_aligned = copy.deepcopy(traj_est)
+        traj_est_aligned.align(traj_ref, correct_scale=True)
+        fig = plt.figure()
+        traj_by_label = {
+            "estimate (not aligned)": traj_est,
+            "estimate (aligned)": traj_est_aligned,
+            "reference": traj_ref
+        }
+        plot.trajectories(fig, traj_by_label, plot.PlotMode.xyz)
+        plt.show()
