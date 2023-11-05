@@ -36,6 +36,10 @@ def loadKITTI(path):
     #tstamp = [float(color_path.split("/")[-1].replace("frame", "").replace(".jpg", "").replace(".png", "")) for color_path in color_paths]
     return color_paths, tstamp
 
+def loadEuRoC(path):
+    color_paths = sorted(glob.glob(os.path.join(args.datapath, 'mav0/cam0/data/*.png')))     
+    tstamp = [np.float64(x.split('/')[-1][:-4])/1e9 for x in color_paths]
+
 def associate_frames(tstamp_image, tstamp_pose, max_dt=0.08):
     """ pair images, depths, and poses """
     associations = []
@@ -94,6 +98,8 @@ if __name__ == "__main__":
         gt_color_paths, gt_tstamp = loadReplica(args.gt_path)
     elif "kitti" in args.gt_path.lower():
         gt_color_paths, gt_tstamp = loadKITTI(args.gt_path)   
+    elif "euroc" in args.gt_path.lower():
+        gt_color_paths, gt_tstamp = loadEuRoC(args.gt_path)  
     else:
         gt_color_paths, gt_tstamp = loadTUM(args.gt_path)
     
@@ -229,6 +235,8 @@ if __name__ == "__main__":
         gt_file = os.path.join(args.gt_path, 'pose_TUM.txt')
         traj_ref = file_interface.read_tum_trajectory_file(gt_file)
         #if not os.path.isfile(gt_file):
+    elif "euroc" in args.gt_path.lower():
+        gt_file = os.path.join(args.gt_path, 'mav0/state_groundtruth_estimate0/data.csv')
     else:
         gt_file = os.path.join(args.gt_path, 'groundtruth.txt')   
         traj_ref = file_interface.read_tum_trajectory_file(gt_file)

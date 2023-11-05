@@ -8,8 +8,9 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
             "eth3d": {"path": "/homes/huajian/Dataset/ETH3D",
                         "scenes": ["desk_3", "mannequin_1", "mannequin_3", "planar_2", "planar_3", "table_7"]},
             "kitti": {"path": "/homes/huajian/Dataset/KITTI",
-                        "scenes": ["00", "01","02","03","04","05","06","07","08","09","10"]
-                    }
+                        "scenes": ["00", "01","02","03","04","05","06","07","08","09","10"]},
+            "euroc": {"path": "/homes/huajian/Dataset/EuRoC",
+                      "scenes": ["MH_01_easy", "MH_02_easy","V1_01_easy","V1_02_easy"]}
             }
 
 # path the all results
