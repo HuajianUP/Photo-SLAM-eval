@@ -237,6 +237,7 @@ if __name__ == "__main__":
         #if not os.path.isfile(gt_file):
     elif "euroc" in args.gt_path.lower():
         gt_file = os.path.join(args.gt_path, 'mav0/state_groundtruth_estimate0/data.csv')
+        traj_ref = file_interface.read_euroc_csv_trajectory(gt_file)
     else:
         gt_file = os.path.join(args.gt_path, 'groundtruth.txt')   
         traj_ref = file_interface.read_tum_trajectory_file(gt_file)

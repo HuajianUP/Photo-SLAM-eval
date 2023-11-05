@@ -10,7 +10,7 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
             "kitti": {"path": "/homes/huajian/Dataset/KITTI",
                         "scenes": ["00", "01","02","03","04","05","06","07","08","09","10"]},
             "euroc": {"path": "/homes/huajian/Dataset/EuRoC",
-                      "scenes": ["MH_01_easy", "MH_02_easy","V1_01_easy","V1_02_easy"]}
+                      "scenes": ["MH_01_easy", "MH_02_easy","V1_01_easy","V2_01_easy"]}
             }
 
 # path the all results
