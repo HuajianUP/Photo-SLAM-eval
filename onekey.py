@@ -5,7 +5,7 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
                            "scenes": ['office0', 'office1', 'office2', 'office3', 'office4', 'room0', 'room1', 'room2' ]}, 
             "tum": {"path": "/homes/huajian/Dataset/TUM",
                     "scenes": ['rgbd_dataset_freiburg3_long_office_household', 'rgbd_dataset_freiburg2_xyz', 'rgbd_dataset_freiburg1_desk']},
-            "eth3D": {"path": "/homes/huajian/Dataset/ETH3D",
+            "eth3d": {"path": "/homes/huajian/Dataset/ETH3D",
                         "scenes": ["desk_3", "mannequin_1", "mannequin_3", "planar_2", "planar_3", "table_7"]},
             "kitti": {"path": "/homes/huajian/Dataset/KITTI",
                         "scenes": ["00", "01","02","03","04","05","06","07","08","09","10"]
@@ -14,7 +14,7 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
 
 # path the all results
 result_main_folder = os.path.join("../result/3080ti/")
-results = sorted(os.listdir(result_main_folder))
+results = [m for m in sorted(os.listdir(result_main_folder)) if os.path.isdir(m)]
 
 for result in results:
     print("processing", result)
@@ -32,35 +32,52 @@ for result in results:
                 os.system("python run.py {} {}".format(result_path, gt_path))
 
 
+logs = [] 
+camera_type = ['mono', 'rgbd', 'stereo']
 #### get the result file ####
 for gt_dataset_name in gt_dataset:
     # mono
     scenes = gt_dataset[gt_dataset_name]["scenes"]
-    results = sorted(glob.glob(os.path.join(result_main_folder, "{}_mono*".format(gt_dataset_name))))
-    for result in results:
-        for scene in scenes:
-            # T	R PSNR SSIM	LPIPS Tracking speed Rendering speed
-            T, R = None, None
-            with open(os.path.join(result, scene, "metrics_traj.txt")) as fin:
-                lines = fin.readlines()
-                ape_T = lines[7].split()
-                assert ape_T[0] == "rmse", result
-                T = ape_T[-1]
-                ape_R = lines[17].split()
-                assert ape_R[0] == "rmse", result
-                R = ape_R[-1]
-            with open(os.path.join(result, scene, "eval.txt")) as fin:
-                PSNR = fin.readline().split()[-1]
-                SSIM = fin.readline().split()[-1]
-                LPIPS = fin.readline().split()[-1]
-                Tracking_time = fin.readline().split()[-1]
-                Tracking_fps = fin.readline().split()[-1]
-                Rendering_time = fin.readline().split()[-1]
-                Rendering_fps = fin.readline().split()[-1]
-            result_str = "{} {} {} {} {} {} {} {}".format(scene, T, R, PSNR, SSIM, LPIPS, Tracking_fps, Rendering_fps)
-            print(result_str)
-    #rgbd
-
+    for camera in camera_type:
+        results = sorted(glob.glob(os.path.join(result_main_folder, "{}_{}*".format(gt_dataset_name, camera))))
+        for result in results:
+            print(result)             
+            logs.append(result+"\n")
+            for scene in scenes:
+                # T	R PSNR SSIM	LPIPS Tracking speed Rendering speed
+                T, R = None, None
+                if os.path.exists(os.path.join(result, scene, "metrics_traj.txt")):
+                    with open(os.path.join(result, scene, "metrics_traj.txt")) as fin:
+                        lines = fin.readlines()
+                        ape_T = lines[7].split()
+                        assert ape_T[0] == "rmse", result
+                        T = ape_T[-1]
+                        ape_R = lines[17].split()
+                        assert ape_R[0] == "rmse", result
+                        R = ape_R[-1]
+                PSNR, SSIM, LPIPS, Tracking_fps, Rendering_fps =  None, None, None, None, None
+                if os.path.exists(os.path.join(result, scene, "eval.txt")):    
+                    with open(os.path.join(result, scene, "eval.txt")) as fin:
+                        PSNR = fin.readline().split()[-1]
+                        SSIM = fin.readline().split()[-1]
+                        LPIPS = fin.readline().split()[-1]
+                        Tracking_time = fin.readline().split()[-1]
+                        Tracking_fps = fin.readline().split()[-1]
+                        Rendering_time = fin.readline().split()[-1]
+                        Rendering_fps = fin.readline().split()[-1]
+                result_str = "{} {} {} {} {} {} {} {}\n".format(scene, T, R, PSNR, SSIM, LPIPS, Tracking_fps, Rendering_fps)
+                print(result_str)
+                logs.append(result_str)
+#rgbd
+with open(os.path.join(result_main_folder,'log.txt'), 'w') as out_file:         
+    for log in logs:   
+        out_file.write(log)
+import csv
+with open(os.path.join(result_main_folder,'log.csv'), 'w') as out_file:         
+    writer = csv.writer(out_file)    
+    writer.writerow(('scene', 'T', 'R', 'PSNR', 'SSIM', 'LPIPS', 'Tracking FPS', 'Rendering FPS'))     
+    for log in logs:   
+        writer.writerow(log.split())
 
 
 """ 

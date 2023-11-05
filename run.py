@@ -21,7 +21,10 @@ def loadReplica(path):
     return color_paths, tstamp
 
 def loadTUM(path):
-    color_paths = sorted(glob.glob(os.path.join(path, "rgb/*.png")))
+    if os.path.exists(os.path.join(path, "rgb3")):
+        color_paths = sorted(glob.glob(os.path.join(path, "rgb3/*.png")))
+    else:
+        color_paths = sorted(glob.glob(os.path.join(path, "rgb/*.png")))
     #print(path, color_paths)
     tstamp = [float(color_path.split("/")[-1].replace("frame", "").replace(".jpg", "").replace(".png", "")) for color_path in color_paths]
     return color_paths, tstamp
