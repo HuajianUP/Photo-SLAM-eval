@@ -37,7 +37,7 @@ def loadKITTI(path):
     return color_paths, tstamp
 
 def loadEuRoC(path):
-    color_paths = sorted(glob.glob(os.path.join(args.datapath, 'mav0/cam0/data/*.png')))     
+    color_paths = sorted(glob.glob(os.path.join(path, 'mav0/cam0/data/*.png')))     
     tstamp = [np.float64(x.split('/')[-1][:-4])/1e9 for x in color_paths]
 
 def associate_frames(tstamp_image, tstamp_pose, max_dt=0.08):

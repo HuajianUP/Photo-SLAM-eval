@@ -15,7 +15,7 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
 
 # path the all results
 result_main_folder = os.path.join("../result/3080ti/")
-results = [m for m in sorted(os.listdir(result_main_folder)) if os.path.isdir(m)]
+results = [m for m in sorted(os.listdir(result_main_folder)) if os.path.isdir(os.path.join(result_main_folder, m))]
 
 for result in results:
     print("processing", result)
