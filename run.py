@@ -37,8 +37,11 @@ def loadKITTI(path):
     return color_paths, tstamp
 
 def loadEuRoC(path):
-    color_paths = sorted(glob.glob(os.path.join(path, 'mav0/cam0/data/*.png')))     
+    #print(path)
+    color_paths = sorted(glob.glob(os.path.join(path, 'mav0/cam0/data/*.png')))    
+    #print(color_paths) 
     tstamp = [np.float64(x.split('/')[-1][:-4])/1e9 for x in color_paths]
+    return color_paths, tstamp
 
 def associate_frames(tstamp_image, tstamp_pose, max_dt=0.08):
     """ pair images, depths, and poses """
@@ -99,6 +102,7 @@ if __name__ == "__main__":
     elif "kitti" in args.gt_path.lower():
         gt_color_paths, gt_tstamp = loadKITTI(args.gt_path)   
     elif "euroc" in args.gt_path.lower():
+        print(args.gt_path)
         gt_color_paths, gt_tstamp = loadEuRoC(args.gt_path)  
     else:
         gt_color_paths, gt_tstamp = loadTUM(args.gt_path)
@@ -135,6 +139,10 @@ if __name__ == "__main__":
         t1 = time.time() - t0
         render_image = render_image.permute(1, 2, 0)
         gt_image = Image.open(gt_color_paths[gt_indx])
+        gt_image = np.array(gt_image)
+        if(len(gt_image.shape)<3):
+            gt_image = np.broadcast_to(gt_image[..., None], (gt_image.shape[0],gt_image.shape[1],3))
+
         if distortion is not None:
             #print(K, distortion)
             gt_image_mask = np.ones_like(gt_image)
