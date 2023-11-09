@@ -1,6 +1,6 @@
 import os
 import glob
-
+import numpy as np
 gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
                            "scenes": ['office0', 'office1', 'office2', 'office3', 'office4', 'room0', 'room1', 'room2' ]}, 
             "tum": {"path": "/homes/huajian/Dataset/TUM",
@@ -14,7 +14,7 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
             }
 
 # path the all results
-result_main_folder = os.path.join("../result/4090/results_level1/")
+result_main_folder = os.path.join("../result/4090/results_wo_com/")
 results = [m for m in sorted(os.listdir(result_main_folder)) if os.path.isdir(os.path.join(result_main_folder, m))]
 
 for result in results:
@@ -67,6 +67,13 @@ for gt_dataset_name in gt_dataset:
                         Tracking_fps = fin.readline().split()[-1]
                         Rendering_time = fin.readline().split()[-1]
                         Rendering_fps = fin.readline().split()[-1]
+                
+                render_path = glob.glob(os.path.join(result, scene, "*shutdown", "render_time.txt"))
+                if len(render_path)>0:
+                   render_time = np.loadtxt(render_path[0], delimiter=' ', dtype=np.unicode_)
+                   render_time = render_time[:, 1].astype(np.float32)
+                   Rendering_fps = 1000/np.mean(render_time)
+
                 result_str = "{} {} {} {} {} {} {} {} {}\n".format(scene, T, R, PSNR, SSIM, LPIPS, Tracking_fps, Rendering_fps, T_std)
                 print(result_str)
                 logs.append(result_str)
