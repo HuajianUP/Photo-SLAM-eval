@@ -69,6 +69,7 @@ if __name__ == "__main__":
     width, height, fovx, fovy = 0,0,0,0
     ts = []
     Rs = []
+    render_time = 0
     for file_name in dirs:
         #print(file_name)
         if "shutdown" in file_name:
@@ -195,8 +196,9 @@ if __name__ == "__main__":
         fout.write("lpips: {}\n".format(np.mean(lpips_list)))
         fout.write("tracking s: {}\n".format(np.mean(tracking_time)))
         fout.write("tracking FPS: {}\n".format(1/np.mean(tracking_time)))
-        fout.write("rendering ms: {}\n".format(np.mean(psnr_list)))
-        fout.write("rendering FPS: {}\n".format(1000/np.mean(psnr_list)))
+
+        fout.write("rendering ms: {}\n".format(np.mean(render_time)))
+        fout.write("rendering FPS: {}\n".format(1000/np.mean(render_time)))
 
     #gt = view.original_image[0:3, :, :]
 
