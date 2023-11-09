@@ -14,7 +14,7 @@ gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
             }
 
 # path the all results
-result_main_folder = os.path.join("../result/3080ti/")
+result_main_folder = os.path.join("../result/4090/results_level1/")
 results = [m for m in sorted(os.listdir(result_main_folder)) if os.path.isdir(os.path.join(result_main_folder, m))]
 
 for result in results:
@@ -46,13 +46,14 @@ for gt_dataset_name in gt_dataset:
             logs.append(result+"\n")
             for scene in scenes:
                 # T	R PSNR SSIM	LPIPS Tracking speed Rendering speed
-                T, R = None, None
+                T, R, T_std = None, None, None
                 if os.path.exists(os.path.join(result, scene, "metrics_traj.txt")):
                     with open(os.path.join(result, scene, "metrics_traj.txt")) as fin:
                         lines = fin.readlines()
                         ape_T = lines[7].split()
                         assert ape_T[0] == "rmse", result
                         T = ape_T[-1]
+                        T_std = lines[9].split()[-1]
                         ape_R = lines[17].split()
                         assert ape_R[0] == "rmse", result
                         R = ape_R[-1]
@@ -66,7 +67,7 @@ for gt_dataset_name in gt_dataset:
                         Tracking_fps = fin.readline().split()[-1]
                         Rendering_time = fin.readline().split()[-1]
                         Rendering_fps = fin.readline().split()[-1]
-                result_str = "{} {} {} {} {} {} {} {}\n".format(scene, T, R, PSNR, SSIM, LPIPS, Tracking_fps, Rendering_fps)
+                result_str = "{} {} {} {} {} {} {} {} {}\n".format(scene, T, R, PSNR, SSIM, LPIPS, Tracking_fps, Rendering_fps, T_std)
                 print(result_str)
                 logs.append(result_str)
 #rgbd
@@ -76,7 +77,7 @@ with open(os.path.join(result_main_folder,'log.txt'), 'w') as out_file:
 import csv
 with open(os.path.join(result_main_folder,'log.csv'), 'w') as out_file:         
     writer = csv.writer(out_file)    
-    writer.writerow(('scene', 'T', 'R', 'PSNR', 'SSIM', 'LPIPS', 'Tracking FPS', 'Rendering FPS'))     
+    writer.writerow(('scene', 'T', 'R', 'PSNR', 'SSIM', 'LPIPS', 'Tracking FPS', 'Rendering FPS',"T_std"))     
     for log in logs:   
         writer.writerow(log.split())
 
