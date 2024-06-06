@@ -1,0 +1,4 @@
+# ninja log v5
+0	5133	1717684141222963087	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/simple-knn/build/temp.linux-x86_64-cpython-310/simple_knn.o	30baa842e94a3db6
+0	7721	1717684143811031544	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/simple-knn/build/temp.linux-x86_64-cpython-310/ext.o	579e2f5c9d3eb412
+0	22893	1717684158983432787	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/simple-knn/build/temp.linux-x86_64-cpython-310/spatial.o	7c47742041ca0db3

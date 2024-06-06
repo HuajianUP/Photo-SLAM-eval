@@ -1,20 +1,36 @@
 import os
 import glob
 import numpy as np
-gt_dataset = {"replica": {"path": "/homes/huajian/Dataset/Replica/",
+import argparse
+"""
+This is a scipt to calcuate quantitative results stored in the result_main_folder for the evluation dataset
+Outputs are two files including "result_main_folder/log.txt" and "result_main_folder/log.csv"
+"""
+
+parser = argparse.ArgumentParser(description="evaluation script")
+parser.add_argument("-d", "--dataset_center_path", type=str, required=True)
+parser.add_argument("-r", "--result_main_folder", type=str, required=True)
+args = parser.parse_args()
+
+# dataset_center_path = "/homes/huajian/Dataset"
+# result_main_folder = os.path.join("../result/4090/results/")
+
+dataset_center_path = args.dataset_center_path
+result_main_folder = args.result_main_folder
+
+gt_dataset = {"replica": {"path": os.path.join(dataset_center_path, "/Replica/"),
                            "scenes": ['office0', 'office1', 'office2', 'office3', 'office4', 'room0', 'room1', 'room2' ]}, 
-            "tum": {"path": "/homes/huajian/Dataset/TUM",
+            "tum": {"path": os.path.join(dataset_center_path, "/TUM"),
                     "scenes": ['rgbd_dataset_freiburg3_long_office_household', 'rgbd_dataset_freiburg2_xyz', 'rgbd_dataset_freiburg1_desk']},
-            "eth3d": {"path": "/homes/huajian/Dataset/ETH3D",
+            "eth3d": {"path": os.path.join(dataset_center_path, "/ETH3D"),
                         "scenes": ["desk_3", "mannequin_1", "mannequin_3", "planar_2", "planar_3", "table_7"]},
-            "kitti": {"path": "/homes/huajian/Dataset/KITTI",
+            "kitti": {"path": os.path.join(dataset_center_path, "/KITTI"),
                         "scenes": ["00", "01","02","03","04","05","06","07","08","09","10"]},
-            "euroc": {"path": "/homes/huajian/Dataset/EuRoC",
+            "euroc": {"path": os.path.join(dataset_center_path, "/EuRoC"),
                       "scenes": ["MH_01_easy", "MH_02_easy","V1_01_easy","V2_01_easy"]}
             }
 
 # path the all results
-result_main_folder = os.path.join("../result/4090/results_wo_com/")
 results = [m for m in sorted(os.listdir(result_main_folder)) if os.path.isdir(os.path.join(result_main_folder, m))]
 
 for result in results:

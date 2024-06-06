@@ -2,6 +2,11 @@ import os
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+import argparse
+parser = argparse.ArgumentParser(description="This is a script convert Replica camera pose file to TUM_camera_pose format")
+parser.add_argument("-d", "--replica_dataset_path", type=str, required=True)
+args = parser.parse_args()
+
 def load_poses(path):
     poses = []
     with open(path, "r") as f:
@@ -29,10 +34,9 @@ def save_pose_as_tum(path, poses):
             f.write(line)
             i+=1
 
-
-folders = os.listdir(".")
+folders = os.listdir(args.replica_dataset_path)
 for folder in folders:
-    path = folder + "/traj.txt"
+    path = os.path.join(args.replica_dataset_path, folder, "/traj.txt")
     if os.path.exists(path):
         poses = load_poses(path)
         save_pose_as_kitti(path.replace("traj.txt", "pose.txt"), poses)

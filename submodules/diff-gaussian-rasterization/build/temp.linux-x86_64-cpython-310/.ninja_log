@@ -1,0 +1,6 @@
+# ninja log v5
+0	1147	1717684192752325367	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/diff-gaussian-rasterization/build/temp.linux-x86_64-cpython-310/cuda_rasterizer/forward.o	8f08c68bcac5f95
+0	1171	1717684192776326002	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/diff-gaussian-rasterization/build/temp.linux-x86_64-cpython-310/cuda_rasterizer/backward.o	feb10f27fcd300aa
+0	3370	1717684194976384132	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/diff-gaussian-rasterization/build/temp.linux-x86_64-cpython-310/cuda_rasterizer/rasterizer_impl.o	814670009d678085
+0	7932	1717684199536504613	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/diff-gaussian-rasterization/build/temp.linux-x86_64-cpython-310/ext.o	6e09ce54a55504ea
+0	23740	1717684215344922196	/home/vgd/research/Photo-SLAM/ws/Photo-SLAM-eval/submodules/diff-gaussian-rasterization/build/temp.linux-x86_64-cpython-310/rasterize_points.o	58bd7bb037ed8ef2
