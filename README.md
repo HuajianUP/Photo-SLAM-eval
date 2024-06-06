@@ -27,24 +27,24 @@ results
     └── scene_n
 ```
 
-### Install required python package
+### Install required python packages
 ```
-# You need to install compatible Pytorch as well.
+# You need to install a compatible Pytorch as well.
 # such as conda install pytorch==2.1.2 torchvision==0.16.2 pytorch-cuda=11.8 -c pytorch -c nvidia
 
 git clone https://github.com/HuajianUP/Photo-SLAM-eval.git
 pip install evo numpy scipy scikit-image lpips pillow tqdm plyfile
 ```
 
-### (Optional) install submodel for rendering
+### (Optional) Install submodel for rendering
 ```
-# If you have installed original GS submodel, you can skip these steps.
+# If you have installed original GS submodels, you can skip these steps.
 
 pip install submodules/simple-knn/ 
 pip install submodules/diff-gaussian-rasterization/
 ```
 
-### Convert Replica GT camera pose files to suitable pose files to run EVO package
+### Convert Replica GT camera pose files to suitable pose files to run the EVO package
 ```
 python shapeReplicaGT.py --replica_dataset_path PATH_TO_REPLICA_DATASET
 ```
@@ -58,7 +58,7 @@ cp TUM/fr2/camera.yaml PATH_TO_TUM_DATASET/rgbd_dataset_freiburg2_xyz
 ```
 
 ## Evaluation
-To get all metrics, you can run 
+To get all the metrics, you can run 
 ```
 python onekey.py --dataset_center_path PATH_TO_ALL_DATASET --result_main_folder RESULTS_PATH
 ```
